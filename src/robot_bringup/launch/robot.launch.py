@@ -115,10 +115,10 @@ def generate_launch_description():
       DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
                                             description='Absolute path to rviz config file'),                                    
       argus_camera_node,
-      lidar,
+      robot_state_publisher_node,
       robot_app,
       robot_controller,
       robot_odometry,
-      robot_state_publisher_node,
+      lidar,
       rviz_node
    ])
