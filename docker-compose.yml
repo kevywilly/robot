@@ -1,0 +1,61 @@
+version: '3.4'
+services:  
+  novnc:
+    image: felix.novnc:latest
+    container_name: "novnc"
+    environment:
+      - DISPLAY_WIDTH=1440
+      - DISPLAY_HEIGHT=900
+    ports:
+      - "8080:8080"
+    networks:
+      - x11
+  robot:
+    image: isaac_ros_dev-aarch64:latest
+    container_name: "robot"
+    command: tail -f /dev/null
+    privileged: true
+    user: admin
+    entrypoint: /usr/local/bin/scripts/workspace-entrypoint.sh
+    working_dir: /workspaces/isaac_ros-dev
+    # network_mode: host
+    volumes:
+      - /home/orin/workspaces:/workspaces
+      - /dev/*:/dev/*
+      - /dev/myserial:/dev/myserial
+      - /dev/rplidar:/dev/rplidar
+      - /etc/localtime:/etc/localtime:ro
+      - /usr/bin/tegrastats:/usr/bin/tegrastats
+      - /tmp/argus_socket:/tmp/argus_socket
+      - /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11
+      - /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11
+      - /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10
+      - /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcufft.so.10:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcufft.so.10
+      - /usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so
+      - /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcupti.so.11.4:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcupti.so.11.4
+      - /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcudla.so.1:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcudla.so.1
+      - /usr/local/cuda-11.4/targets/aarch64-linux/include/nvToolsExt.h:/usr/local/cuda-11.4/targets/aarch64-linux/include/nvToolsExt.h
+      - /usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra
+      - /usr/src/jetson_multimedia_api:/usr/src/jetson_multimedia_api
+      - /opt/nvidia/nsight-systems-cli:/opt/nvidia/nsight-systems-cli
+      - /opt/nvidia/vpi2:/opt/nvidia/vpi2
+      - /usr/share/vpi2:/usr/share/vpi2
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /home/orin/.Xauthority:/home/admin/.Xauthority:rw
+    environment:
+      - DISPLAY=novnc:0.0
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/usr/local/share/middleware_profiles/rtps_udp_profile.xml
+      - ROS_DOMAIN_ID
+      - USER
+      - --pid=host
+    ports:
+      - "5000:5000"
+      - "80:80"
+    networks:
+      - x11 
+networks:
+  x11:
+
+
