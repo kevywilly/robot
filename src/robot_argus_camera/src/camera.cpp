@@ -55,7 +55,7 @@ private:
         }
 
         if(num_cameras_ > 1) {
-          camera_1_ = cv::VideoCapture("nvarguscamerasrc sensor_id=2 sensor_mode=4 ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720,format=(string)NV12, framerate=(fraction)60/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink");
+          camera_1_ = cv::VideoCapture("nvarguscamerasrc sensor_id=1 sensor_mode=4 ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720,format=(string)NV12, framerate=(fraction)60/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink");
 
           if (!camera_1_.isOpened()) {
               RCLCPP_ERROR(this->get_logger(), "Failed to open the camera.");

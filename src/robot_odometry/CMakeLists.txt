@@ -11,6 +11,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(rclcpp  REQUIRED)
 
 # uncomment the following section in order to fill in
@@ -18,7 +19,7 @@ find_package(rclcpp  REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 add_executable(odometry src/odometry.cpp)
-ament_target_dependencies(odometry rclcpp tf2 tf2_ros nav_msgs geometry_msgs)
+ament_target_dependencies(odometry rclcpp tf2 tf2_ros nav_msgs geometry_msgs sensor_msgs)
 
 target_include_directories(odometry PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

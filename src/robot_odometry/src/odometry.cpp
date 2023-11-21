@@ -41,14 +41,14 @@ class OdomPublisher:public rclcpp ::Node
    double linear_velocity_x_ = 0.0;
    double linear_velocity_y_ = 0.0;
    double angular_velocity_z_ = 0.0;
-   double wheelbase_ = 0.25;
+   double wheelbase_ = 0.23;
    bool pub_odom_tf_ = false;
    rclcpp::Time last_vel_time_  ;
 	public:
 	  OdomPublisher()
 	  : Node("odometry")
 	  {            
-        this->declare_parameter<double>("wheelbase",0.25);
+        this->declare_parameter<double>("wheelbase",0.23);
         this->declare_parameter<std::string>("odom_frame","odom");
         this->declare_parameter<std::string>("base_footprint_frame","base_footprint"); 
         this->declare_parameter<double>("linear_scale_x",1.0);
@@ -130,7 +130,7 @@ class OdomPublisher:public rclcpp ::Node
               rclcpp::Time now = this->get_clock()->now();
               t.header.stamp = now;
               t.header.frame_id = "odom";
-              t.child_frame_id = "base_footprint";
+              t.child_frame_id = "base_link";
               t.transform.translation.x = x_pos_;
               t.transform.translation.y = y_pos_;
               t.transform.translation.z = 0.0;

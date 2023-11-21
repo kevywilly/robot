@@ -1,59 +1,36 @@
 import rclpy
 import signal
 import threading
-import flask
 from flask_cors import CORS
 from flask import Flask, Response, request
-import cv2
-import cv_bridge
 from rclpy.node import Node
+from rclpy import qos
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 import robot.common.image_utils as image_utils
-
-bridge = cv_bridge.CvBridge()
-
-class DriveCommand:
-    def __init__(self, x, y, z):
-        self.x = float(x)
-        self.y = float(y)
-        self.z = float(z)
 
 class Api(Node):
     def __init__(self):
         super().__init__('app')
 
-        self.left_image: Image = None
         self.left_image_bytes: bytes = None
-        self.right_image: Image = None
         self.right_image_bytes: bytes = None
 
         # publishers
-        self.velocity_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.velocity_publisher = self.create_publisher(Twist, '/cmd_vel', qos.qos_profile_services_default)
 
         # subscriptions
         self.create_subscription(Image, "/left/image_raw", self.left_image_callback, 10)
         self.create_subscription(Image, "/right/image_raw", self.right_image_callback, 10)
 
-    def drive(self, cmd: DriveCommand):
-        msg = Twist()
-        msg.linear.x = cmd.x
-        msg.linear.y = cmd.y
-        msg.angular.z = cmd.z
-
+    def drive(self, msg: Twist):
         self.velocity_publisher.publish(msg)
-        return cmd
-
+        
     def left_image_callback(self, msg: Image):
-        self.left_image = msg
         self.left_image_bytes = image_utils.sensor_image_to_jpeg_bytes(msg)
 
     def right_image_callback(self, msg: Image):
-        self.right_image = msg
         self.right_image_bytes = image_utils.sensor_image_to_jpeg_bytes(msg)
-
-    def get_image(self, index: int = 0):
-        return self.left_image if index == 0 else self.right_image
     
     def get_jpeg(self, index: int = 0):
         return self.left_image_bytes if index == 0 else self.right_image_bytes
@@ -111,6 +88,7 @@ def _get_stream(index: int = 0):
 def stream(index: str):
     return Response(_get_stream(int(index)), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
 @app.route('/api/stream')
 def stream_input(input: str):
     return Response(_get_stream(0), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -119,10 +97,23 @@ def stream_input(input: str):
 @app.post('/api/drive')
 def apply_drive():
     data = request.get_json()
-    cmd: DriveCommand = DriveCommand(**data)
-    resp: DriveCommand = app_node.drive(cmd)
+
+    t = Twist()
+    try:
+        t.linear.x = float(data["x"])
+        t.linear.y = float(data["y"])
+        t.angular.z = float(data["z"])
+    except:
+        t = Twist()
+
+    app_node.velocity_publisher.publish(t)
     
-    return resp.__dict__
+    return data
+
+@app.post('/api/stop')
+def stop():
+    app_node.velocity_publisher.publish(Twist())
+    return {"x": 0, "y": 0, "z": 0}
 
 
 def main(args=None):
