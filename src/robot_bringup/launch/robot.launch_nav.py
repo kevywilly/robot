@@ -89,6 +89,11 @@ robot_state_publisher_node = Node(
       
    )
 
+robot_mapper = Node(
+   package="robot_mapper",
+   executable="mapper",
+   name="mapper"
+)
 
 
 cam1_node = ComposableNode(
@@ -154,5 +159,6 @@ def generate_launch_description():
       lidar,
       nav2,
       slam2,
-      rviz_node
+      rviz_node,
+      robot_mapper
    ])

@@ -40,13 +40,25 @@ robot_odometry = Node(
    name='robot_odometry'
 )
 
+robot_mapper = Node(
+   package="robot_mapper",
+   executable="mapper",
+   name="mapper"
+)
+
+robot_tof = Node(
+   package="robot_tof",
+   executable="tof",
+   name="tof"
+)
+
 argus_camera_node = Node(
       package='robot_argus_camera',
       executable='camera',
       name='camera',
       output='screen',
       parameters = [
-         {'num_cameras': 2}
+         {'num_cameras': 1}
       ]
    )
 
@@ -57,5 +69,7 @@ def generate_launch_description():
       robot_app,
       robot_controller,
       robot_odometry,
-      lidar
+      lidar,
+      robot_tof,
+      robot_mapper
    ])

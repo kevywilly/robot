@@ -7,6 +7,8 @@ from rclpy.node import Node
 from rclpy import qos
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Bool
+
 import robot.common.image_utils as image_utils
 
 class Api(Node):
@@ -18,10 +20,19 @@ class Api(Node):
 
         # publishers
         self.velocity_publisher = self.create_publisher(Twist, '/cmd_vel', qos.qos_profile_services_default)
+        self.autodrive_publisher = self.create_publisher(Bool, '/autodrive', qos.qos_profile_services_default)
 
         # subscriptions
         self.create_subscription(Image, "/left/image_raw", self.left_image_callback, 10)
         self.create_subscription(Image, "/right/image_raw", self.right_image_callback, 10)
+
+        self.autodrive = False
+
+    def toggle_autodrive(self):
+        self.autodrive = not self.autodrive
+        msg = Bool()
+        msg.data = self.autodrive
+        self.autodrive_publisher.publish(msg)
 
     def drive(self, msg: Twist):
         self.velocity_publisher.publish(msg)
@@ -109,6 +120,15 @@ def apply_drive():
     app_node.velocity_publisher.publish(t)
     
     return data
+
+@app.post('/api/autodrive')
+def toggle_autodrive():
+    app_node.toggle_autodrive()
+    return {"status": app_node.autodrive}
+
+@app.get('/api/autodrive')
+def get_autodrive():
+    return {"status": app_node.autodrive}
 
 @app.post('/api/stop')
 def stop():
