@@ -38,6 +38,7 @@ class Mapper(Node):
         self.set_autodrive(False)
         self.prev_heading = None
         self.tof_meters: float = 12.5
+        self.last_twist = None
 
     def autodrive_handler(self, msg: Bool):
         self.set_autodrive(msg.data)
@@ -109,9 +110,10 @@ class Mapper(Node):
         for range in scan.ranges:
             value = scan.range_max if math.isinf(range) else range
 
-            #if(r >= tof_min_angle and r <= tof_max_angle):
-                # value = min(self.tof_meters, value)
-            #    pass
+            if(r >= tof_min_angle and r <= tof_max_angle):
+                if self.tof_meters < THRESHOLD:
+                    value = min(self.tof_meters, value)
+                
 
             # reference frame is reversed - robot thinks in counter clockwise
             measure = (r, r*DEGREES, value)
@@ -133,8 +135,14 @@ class Mapper(Node):
 
         self.get_logger().info(f"options: {best_options}, tof: {self.tof_meters}, deg: {degrees}")
 
+        
+        
+        if self.autodrive:
+            self.apply_auto(degrees)
+        
+    def apply_auto(self, degrees):
+        
         twist = Twist()
-
         if degrees is not None:
             if degrees > 0:
                 twist.angular.z = 1.5
@@ -145,7 +153,8 @@ class Mapper(Node):
 
         self.cmd_vel_publisher.publish(twist)
         
-        
+        self.degrees = degrees
+        self.last_twist = twist
 
 def main(args=None):
     rclpy.init(args=args)

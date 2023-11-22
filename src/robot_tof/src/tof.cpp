@@ -3,8 +3,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/range.hpp"
 
-
-
 class TofPublisher:public rclcpp ::Node{
   public:
   TofPublisher() : Node("tof") {
@@ -15,6 +13,7 @@ class TofPublisher:public rclcpp ::Node{
 
   void initSensor() {
     tof_0_ = new VL53L0X();
+    
 
     if (!tof_0_->openVL53L0X()) {
         // Trouble
