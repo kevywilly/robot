@@ -133,7 +133,7 @@ class Mapper(Node):
         best_options = self.calc_best_options(self.target, options)
         degrees, err = self.calc_heading(best_options)
 
-        self.get_logger().info(f"options: {best_options}, tof: {self.tof_meters}, deg: {degrees}")
+        # self.get_logger().info(f"options: {best_options}, tof: {self.tof_meters}, deg: {degrees}")
 
         
         

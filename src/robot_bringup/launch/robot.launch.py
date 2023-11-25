@@ -62,6 +62,28 @@ argus_camera_node = Node(
       ]
    )
 
+cam1_node = ComposableNode(
+   name='argus_mono_0',
+   package='isaac_ros_argus_camera',
+   plugin='nvidia::isaac_ros::argus::ArgusMonoNode',
+   parameters=[
+               {'camera_id': 0},
+               {'module_id': 0},
+               {'mode': 4},
+               {'camera_info_url': "file:///workspaces/camera/camera.ini"}
+               ],
+)
+
+argus_contaner = ComposableNodeContainer(
+      name='argus_mono_container',
+      package='rclcpp_components',
+      executable='component_container_mt',
+      composable_node_descriptions=[cam1_node],
+      namespace='',
+      output='screen',
+      arguments=['--ros-args', '--log-level', 'info'],
+   )
+
 def generate_launch_description():
    
    return LaunchDescription([                                  

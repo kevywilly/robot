@@ -47,15 +47,17 @@ public:
 private:
     bool initCamera() {
         // Open the camera using OpenCV
-        camera_0_ = cv::VideoCapture("nvarguscamerasrc sensor_id=0 sensor_mode=4 ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720,format=(string)NV12, framerate=(fraction)60/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink");
-
+        camera_0_ = cv::VideoCapture("nvarguscamerasrc sensor_id=0 sensor_mode=3 ! video/x-raw(memory:NVMM), width=(int)1640, height=(int)1232,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)I420 ! appsink max-buffers=1 drop=true");
+        /*
+                                      nvarguscamerasrc sensor_id=ID ! video/x-raw(memory:NVMM), width=X, height=Y, format=(string)NV12 ! nvvidconv flip-method=M ! video/x-raw, format=I420, appsink max-buffers=1 drop=true
+        */
         if (!camera_0_.isOpened()) {
             RCLCPP_ERROR(this->get_logger(), "Failed to open the camera.");
             return false;
         }
 
         if(num_cameras_ > 1) {
-          camera_1_ = cv::VideoCapture("nvarguscamerasrc sensor_id=1 sensor_mode=4 ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720,format=(string)NV12, framerate=(fraction)60/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink");
+          camera_1_ = cv::VideoCapture("nvarguscamerasrc sensor_id=1 sensor_mode=3 ! video/x-raw(memory:NVMM), width=(int)1640, height=(int)1232,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)I420 ! appsink max-buffers=1 drop=true");
 
           if (!camera_1_.isOpened()) {
               RCLCPP_ERROR(this->get_logger(), "Failed to open the camera.");
@@ -72,13 +74,15 @@ private:
             camera_0_ >> frame_0;
             if (!frame_0.empty()) {
                 // Convert OpenCV image to ROS2 sensor message
-                auto img_msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame_0).toImageMsg();
+                cv::Mat dst_0;
+                cv::cvtColor(frame_0, dst_0, cv::COLOR_YUV2BGR_I420);
+                auto img_msg_0 = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", dst_0).toImageMsg();
 
                 // Publish the image
                 if(num_cameras_ > 1) {
-                  right_image_publisher_->publish(*img_msg);
+                  right_image_publisher_->publish(*img_msg_0);
                 } else {
-                  left_image_publisher_->publish(*img_msg);
+                  left_image_publisher_->publish(*img_msg_0);
                 }
             }
 
@@ -87,10 +91,12 @@ private:
               camera_1_ >> frame_1;
               if (!frame_1.empty()) {
                   // Convert OpenCV image to ROS2 sensor message
-                  auto img_msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame_1).toImageMsg();
+                  cv::Mat dst_1;
+                  cv::cvtColor(frame_1, dst_1, cv::COLOR_YUV2BGR_I420);
+                  auto img_msg_1 = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", dst_1).toImageMsg();
                   
                   // Publish the image
-                  left_image_publisher_->publish(*img_msg);
+                  left_image_publisher_->publish(*img_msg_1);
               }
             }
 
